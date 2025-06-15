@@ -2,15 +2,14 @@ import os
 import requests
 import psycopg2
 import time
+from dotenv import load_dotenv
 
-# Load Riot API key
-with open("riot_key.txt", 'r') as file:
-    RIOT_API_KEY = file.read().strip()
-    
-with open("db_perms.txt", 'r') as file:
-    DB_NAME = file.readline().strip()
-    USER = file.readline().strip()
-    PASSWORD = file.readline().strip()
+load_dotenv()
+# loading env variables
+RIOT_API_KEY = os.getenv("RIOT_API_KEY")
+DB_NAME = os.getenv("DB_NAME")
+USER = os.getenv("USER")
+PASSWORD = os.getenv("PASSWORD")
 
 HEADERS = {"X-Riot-Token": RIOT_API_KEY}
 REGION = "na1"
@@ -68,10 +67,14 @@ for player in riot_tags:
     cur.execute("""
         INSERT INTO players (puuid, game_name, tag_line, summoner_level, revision_date)
         VALUES (%s, %s, %s, %s, %s)
-        ON CONFLICT (puuid) DO NOTHING;
+        ON CONFLICT (puuid) DO UPDATE SET
+            game_name = EXCLUDED.game_name,
+            tag_line = EXCLUDED.tag_line,
+            summoner_level = EXCLUDED.summoner_level,
+            revision_date = EXCLUDED.revision_date;
     """, (
         puuid, game_name, tag_line,
         summoner_data["summonerLevel"], summoner_data["revisionDate"]
     ))
     conn.commit()
-    print(f"Saved: {cur}")
+    print(f"Saved or updated: {cur}")

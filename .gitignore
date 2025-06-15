@@ -1,2 +1,3 @@
-*.txt
-echo "airflow_venv/" >> .gitignore
+.env
+venv/*
+dags/*
