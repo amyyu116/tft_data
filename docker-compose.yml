@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:14
+    container_name: tft_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: tft_data
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  express:
+    build: ./express
+    ports:
+      - "3001:3001"
+    environment:
+      PGUSER: postgres
+      PGPASSWORD: password
+      PGHOST: db
+      PGDATABASE: tft_data
+      PGPORT: 5432
+    depends_on:
+      - db
+    volumes:
+      - ./express:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      WDS_SOCKET_PORT: 0
+    depends_on:
+      - express
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # mask node_modules with container's version
+volumes:
+  pgdata:
