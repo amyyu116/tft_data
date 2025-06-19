@@ -33,14 +33,14 @@ conn = psycopg2.connect(
     port="5432"
 )
 cur = conn.cursor()
-cur.execute("SELECT puuid, game_name, tag_line FROM players WHERE game_name ='Dragon Venom8888';")
+cur.execute("SELECT puuid, game_name, tag_line FROM players WHERE game_name ='monoseiros';")
 riot_tags = cur.fetchall()
 conn.commit()
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS match (
     puuid TEXT,
-    match_id TEXT,              
+    match_id TEXT,
     game_mode TEXT,
     game_datetime BIGINT, 
     patch TEXT,
@@ -108,7 +108,7 @@ def get_all_match_ids(puuid, batch_size=100):
                         if set_number == 14:
                             all_match_ids.append(match_id)
                     else:
-                        break
+                        return all_match_ids
                 except requests.RequestException as e:
                     print(f"Error retrieving match {match_id}: {e}")
                     continue
@@ -135,7 +135,7 @@ def get_match_details(match_id):
                 retry_after = int(response.headers.get("Retry-After", 1))
                 print(f"[429] Rate limited. Retrying after {retry_after} seconds...")
                 time.sleep(retry_after)
-                continue  # Retry the request after waiting
+                continue
             response.raise_for_status()
             return response.json()
 
@@ -163,7 +163,7 @@ for player in riot_tags:
             if set_number not in CURRENT_SETS or set_number != 14:
                 continue            
             game_datetime = match_data["info"]["game_datetime"]
-            gameMode = match_data.get("game_variation") 
+            game_mode = match_data["info"]["tft_game_type"]
             patch = match_data["info"]["game_version"]
 
             for participant in match_data["info"]["participants"]:
@@ -208,7 +208,7 @@ for player in riot_tags:
                     """, (
                         puuid,
                         match_id,
-                        gameMode,
+                        game_mode,
                         game_datetime,
                         patch,
                         level,
@@ -245,7 +245,7 @@ for player in riot_tags:
                 except Exception as e:
                     print(f"Error inserting board details for match {match_id}: {e}")
             # respect rate limit
-            time.sleep(5) 
+            time.sleep(1.2) 
         print(f"Completed {player}'s games.")
         conn.commit()
 

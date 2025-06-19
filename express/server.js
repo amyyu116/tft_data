@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
@@ -6,11 +7,19 @@ const app = express();
 app.use(cors());
 
 const pool = new Pool({
-  user: 'your_user',
-  host: 'localhost',
-  database: 'tft_data',
-  password: 'your_password',
-  port: 5432,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  port: process.env.PGPORT,
+});
+
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('DB connection failed:', err.stack);
+  } else {
+    console.log('DB connected at:', res.rows[0].now);
+  }
 });
 
 app.get('/api/:table', async (req, res) => {

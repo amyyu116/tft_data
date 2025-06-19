@@ -8,7 +8,7 @@ load_dotenv()
 # loading env variables
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 DB_NAME = os.getenv("DB_NAME")
-USER = os.getenv("USER")
+USER = "admin"
 PASSWORD = os.getenv("PASSWORD")
 
 HEADERS = {"X-Riot-Token": RIOT_API_KEY}
@@ -39,7 +39,7 @@ conn.commit()
 
 
 riot_tags = [
-    # {"gameName": "monoseiros", "tagLine": "NA1"},
+    {"gameName": "monoseiros", "tagLine": "NA1"},
     {"gameName": "Dragon Venom8888", "tagLine": "NA1"},
 ]
 

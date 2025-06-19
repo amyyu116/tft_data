@@ -7,7 +7,11 @@ function App() {
 
   useEffect(() => {
     axios.get(`http://localhost:3001/api/${table}`)
-      .then(res => setData(res.data))
+      .then(
+        res => {
+          console.log(res.data);
+          setData(res.data);}
+      )
       .catch(err => console.error(err));
   }, [table]);
 
