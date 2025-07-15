@@ -29,9 +29,54 @@ app.get('/api/:table', async (req, res) => {
   }
 
   try {
-    const result = await pool.query(`SELECT * FROM ${table} LIMIT 100`);
+    const result = await pool.query(`SELECT * FROM ${table} ORDER BY game_datetime LIMIT 100`);
     res.json(result.rows);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/player/:gameName/:tagLine', async (req, res) => {
+  const { gameName, tagLine } = req.params;
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM players WHERE game_name = $1 AND tag_line = $2',
+      [gameName, tagLine]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/match_history/:puuid', async (req, res) => {
+  
+  const { puuid } = req.params;
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM match WHERE puuid = $1 LIMIT 10;',
+      [puuid]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err); // Add this
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/board/:puuid/:match_id', async (req, res) => {
+  const { puuid, match_id } = req.params;
+  
+  try {
+    const result = await pool.query(
+      'SELECT * FROM board_details WHERE puuid = $1 and match_id = $2;',
+      [puuid, match_id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err); // Add this
     res.status(500).json({ error: err.message });
   }
 });

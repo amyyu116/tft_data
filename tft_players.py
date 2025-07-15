@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS players (
     game_name TEXT,
     tag_line TEXT,
     summoner_level BIGINT,
-    revision_date BIGINT
-    
+    revision_date BIGINT,
+    icon_id INT
 );
 """)
 conn.commit()
@@ -65,16 +65,17 @@ for player in riot_tags:
     summoner_data = summoner_r.json()
     print(summoner_data)
     cur.execute("""
-        INSERT INTO players (puuid, game_name, tag_line, summoner_level, revision_date)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO players (puuid, game_name, tag_line, summoner_level, revision_date, icon_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
         ON CONFLICT (puuid) DO UPDATE SET
             game_name = EXCLUDED.game_name,
             tag_line = EXCLUDED.tag_line,
             summoner_level = EXCLUDED.summoner_level,
-            revision_date = EXCLUDED.revision_date;
+            revision_date = EXCLUDED.revision_date,
+            icon_id = EXCLUDED.icon_id;
     """, (
         puuid, game_name, tag_line,
-        summoner_data["summonerLevel"], summoner_data["revisionDate"]
+        summoner_data["summonerLevel"], summoner_data["revisionDate"], summoner_data["profileIconId"]
     ))
     conn.commit()
     print(f"Saved or updated: {cur}")
